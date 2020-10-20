@@ -1,0 +1,240 @@
+---
+title: "Covid/Political EDA"
+output: github_document
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+```
+
+
+
+```{r}
+political_filepath <- "./data/US_County_Level_Presidential_Results_08-16.csv"
+df_pol<- read_csv(political_filepath)
+df_pol_sorted <- df_pol %>%
+  mutate(fips_code = paste0(0,fips_code)) %>%
+  separate(fips_code, into = c("zeros","fips_code"), sep = -5) %>%
+  #select(fips_code, total_2016, dem_2016, gop_2016, oth_2016) %>%
+  arrange(fips_code)
+df_pol_sorted
+?separate
+```
+
+
+
+```{r}
+census_filepath <- "./data/ACSDT5Y2018.B01003_data_with_overlays_2020-10-07T194616.csv"
+df_pop <- read_csv(census_filepath)
+df_pop_sorted <- df_pop %>%
+  separate(col = id, into = c("id_firstpart", "fips"), sep = -5) %>%
+  select('fips', 'Geographic Area Name', 'Estimate!!Total') %>%
+  rename("population" = "Estimate!!Total")
+df_pop_sorted
+
+```
+
+
+```{r}
+# url for county specific covid data
+url_covid_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+
+# where to write file to
+filename_nyt <- "./data/nyt_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties,
+        destfile = filename_nyt
+      )
+
+## Loads the downloaded csv
+df_covid <- read_csv(filename_nyt)
+df_covid
+```
+
+```{r}
+df_joined <- df_covid %>%
+  left_join(df_pop_sorted, by = "fips") %>%
+  left_join(df_pol_sorted, by = c("fips" = "fips_code")) %>%
+  select(date, fips, county, state, population, cases, deaths, total_2016, dem_2016, gop_2016, oth_2016 )
+df_joined
+?left_join
+```
+
+```{r}
+df_normalized <-
+  df_joined %>%
+  mutate(
+    cases_per100k = cases / population * 100000, 
+    deaths_per100k = deaths / population * 100000
+    ) %>%
+  mutate(
+    per_dem = dem_2016/total_2016*100, 
+    per_gop = gop_2016/total_2016*100, 
+    per_oth = oth_2016/total_2016*100, 
+    per_vote = total_2016/population*100
+    ) %>%
+  mutate(county_party = if_else(per_gop >= per_dem, "R", "D")) %>%
+  drop_na()
+df_normalized
+```
+
+
+```{r}
+df_state_party <-
+  df_normalized %>%
+  group_by(state) %>%
+  summarize(state_tot = sum(total_2016), dem_total = sum(dem_2016), gop_total = sum(gop_2016)) %>%
+  mutate(state_party = if_else(gop_total >= dem_total, "R","D")) %>%
+  select(state, state_party)
+df_state_party
+```
+
+```{r}
+df_norm_state <-
+  df_normalized %>%
+  left_join(df_state_party, by = "state")
+df_norm_state
+```
+
+
+
+```{r}
+df_normalized_slim <-
+  df_norm_state %>%
+  select(date, fips, county, state, population, cases_per100k, deaths_per100k, county_party, state_party)
+df_normalized_slim
+```
+
+
+
+
+```{r}
+df_normalized_slim %>%
+  filter(date == "2020-10-15") %>%
+  arrange(desc(cases_per100k))
+```
+
+
+```{r}
+df_norm_state %>%
+  #filter(date >= as.Date("2020-04-01")) %>%
+  group_by(date, county_party) %>%
+  summarize(cases = sum(cases), mean_per100k = mean(cases_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, mean_per100k, color = county_party)) #+
+  #scale_y_log10()
+```
+```{r}
+df_norm_state %>%
+  #filter(date >= as.Date("2020-04-01")) %>%
+  group_by(date, county_party) %>%
+  summarize(cases = sum(cases), mean_per100k = mean(cases_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, cases, color = county_party))# +
+  #scale_y_log10()
+```
+
+
+```{r}
+df_norm_state %>%
+  #filter(date >= as.Date("2020-04-01")) %>%
+  group_by(date, state_party) %>%
+  summarize(cases = sum(cases), mean_per100k = mean(cases_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, mean_per100k, color = state_party)) #+
+  #scale_y_log10()
+```
+
+
+```{r}
+df_norm_state %>%
+  #filter(date >= as.Date("2020-04-01")) %>%
+  group_by(date, state_party) %>%
+  summarize(cases = sum(cases), mean_per100k = mean(cases_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, cases, color = state_party))# +
+  #scale_y_log10()
+```
+
+
+
+
+
+```{r}
+df_norm_state %>%
+  #filter(date >= as.Date("2020-04-01")) %>%
+  group_by(date, state_party) %>%
+  summarize(deaths = sum(deaths), meandeaths_per100k = mean(deaths_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, deaths, color = state_party))# +
+  #scale_y_log10()
+```
+
+```{r}
+df_new_cases <-
+  df_norm_state %>%
+  group_by(fips) %>%
+  mutate(new_cases = cases - lag(cases, default = 0), new_cases_per100k = new_cases/population*100000) %>%
+  mutate(roll7 = (new_cases + 
+           lag(new_cases, n = 2L, default = 0)+ 
+           lag(new_cases, n = 3L, default = 0)+ 
+           lag(new_cases, n = 4L, default = 0)+ 
+           lag(new_cases, n = 5L, default = 0)+ 
+           lag(new_cases, n = 6L, default = 0)+ 
+           lag(new_cases, n = 7L, default = 0))/7) %>%
+  mutate(roll7_per100k= roll7/population * 100000)
+
+df_new_cases
+```
+
+
+```{r}
+df_new_cases %>%
+  group_by(date, state_party) %>%
+  summarize(mean_new_cases = mean(new_cases), new_cases = sum(new_cases), new_cases_per100k = sum(new_cases_per100k), roll7 = sum(roll7), roll7_per100k = sum(roll7_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, roll7, color = state_party))
+
+```
+
+
+
+
+
+**Brief Geographic Analysis**
+
+```{r}
+NE_state <- c(
+  'Maine',
+  'New Hampshire',
+  'Vermont',
+  'Massachusetts',
+  'Connecticut',
+  'Rhode Island',
+  'New Jersey'
+)
+
+
+df_norm_geog <-
+  df_new_cases %>%
+  mutate(region = if_else(state == NE_state, 'NE', 'Other'))
+
+df_norm_geog
+
+df_norm_geog %>%
+  #filter(date >= as.Date("2020-04-01")) %>%
+  group_by(date, region) %>%
+  summarize(deaths = sum(deaths), meandeaths_per100k = mean(deaths_per100k)) %>%
+  ggplot()+
+  geom_line(aes(date, deaths, color = region)) +
+  scale_y_log10()
+
+```
+
+
