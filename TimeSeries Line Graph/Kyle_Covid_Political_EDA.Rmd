@@ -3,17 +3,15 @@ title: "Covid/Political EDA"
 output: github_document
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+Try executing this chunk by clicking the _Run_ button within the chunk or by placing your cursor inside it and pressing _Ctrl+Shift+Enter_.
 
 ```{r}
 library(tidyverse)
 ```
 
-
-
-```{r}
+```{r df-pol}
 political_filepath <- "./data/US_County_Level_Presidential_Results_08-16.csv"
 df_pol<- read_csv(political_filepath)
 df_pol_sorted <- df_pol %>%
@@ -25,9 +23,7 @@ df_pol_sorted
 ?separate
 ```
 
-
-
-```{r}
+```{r df-pop}
 census_filepath <- "./data/ACSDT5Y2018.B01003_data_with_overlays_2020-10-07T194616.csv"
 df_pop <- read_csv(census_filepath)
 df_pop_sorted <- df_pop %>%
@@ -38,8 +34,7 @@ df_pop_sorted
 
 ```
 
-
-```{r}
+```{r download-data}
 # url for county specific covid data
 url_covid_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 
@@ -57,7 +52,7 @@ df_covid <- read_csv(filename_nyt)
 df_covid
 ```
 
-```{r}
+```{r join-datasets}
 df_joined <- df_covid %>%
   left_join(df_pop_sorted, by = "fips") %>%
   left_join(df_pol_sorted, by = c("fips" = "fips_code")) %>%
@@ -66,17 +61,17 @@ df_joined
 ?left_join
 ```
 
-```{r}
+```{r normalize-data}
 df_normalized <-
   df_joined %>%
   mutate(
-    cases_per100k = cases / population * 100000, 
+    cases_per100k = cases / population * 100000,
     deaths_per100k = deaths / population * 100000
     ) %>%
   mutate(
-    per_dem = dem_2016/total_2016*100, 
-    per_gop = gop_2016/total_2016*100, 
-    per_oth = oth_2016/total_2016*100, 
+    per_dem = dem_2016/total_2016*100,
+    per_gop = gop_2016/total_2016*100,
+    per_oth = oth_2016/total_2016*100,
     per_vote = total_2016/population*100
     ) %>%
   mutate(county_party = if_else(per_gop >= per_dem, "R", "D")) %>%
@@ -84,8 +79,7 @@ df_normalized <-
 df_normalized
 ```
 
-
-```{r}
+```{r adding-state-party}
 df_state_party <-
   df_normalized %>%
   group_by(state) %>%
@@ -95,33 +89,27 @@ df_state_party <-
 df_state_party
 ```
 
-```{r}
+```{r normalizing-state}
 df_norm_state <-
   df_normalized %>%
   left_join(df_state_party, by = "state")
 df_norm_state
 ```
 
-
-
-```{r}
+```{r slimming-dataset}
 df_normalized_slim <-
   df_norm_state %>%
   select(date, fips, county, state, population, cases_per100k, deaths_per100k, county_party, state_party)
 df_normalized_slim
 ```
 
-
-
-
-```{r}
+```{r filter-one-date}
 df_normalized_slim %>%
   filter(date == "2020-10-15") %>%
   arrange(desc(cases_per100k))
 ```
 
-
-```{r}
+```{r plot1}
 df_norm_state %>%
   #filter(date >= as.Date("2020-04-01")) %>%
   group_by(date, county_party) %>%
@@ -131,9 +119,7 @@ df_norm_state %>%
   #scale_y_log10()
 ```
 
-
-
-```{r}
+```{r plot2}
 df_norm_state %>%
   #filter(date >= as.Date("2020-04-01")) %>%
   group_by(date, county_party) %>%
@@ -143,8 +129,7 @@ df_norm_state %>%
   #scale_y_log10()
 ```
 
-
-```{r}
+```{r plot3}
 df_norm_state %>%
   #filter(date >= as.Date("2020-04-01")) %>%
   group_by(date, state_party) %>%
@@ -154,8 +139,7 @@ df_norm_state %>%
   #scale_y_log10()
 ```
 
-
-```{r}
+```{r plot4}
 df_norm_state %>%
   #filter(date >= as.Date("2020-04-01")) %>%
   group_by(date, state_party) %>%
@@ -165,11 +149,7 @@ df_norm_state %>%
   #scale_y_log10()
 ```
 
-
-
-
-
-```{r}
+```{r plot5}
 df_norm_state %>%
   #filter(date >= as.Date("2020-04-01")) %>%
   group_by(date, state_party) %>%
@@ -179,30 +159,30 @@ df_norm_state %>%
   #scale_y_log10()
 ```
 
-```{r}
+```{r df-new-cases}
 df_new_cases <-
   df_norm_state %>%
   group_by(fips) %>%
   mutate(
-    new_cases = cases - lag(cases, default = 0), 
+    new_cases = cases - lag(cases, default = 0),
     new_cases_per100k = new_cases/population*100000,
-    new_deaths = deaths - lag(deaths, default = 0), 
+    new_deaths = deaths - lag(deaths, default = 0),
     new_deaths_per100k = new_deaths/population*100000
     )%>%
-  mutate(roll7 = (new_cases + 
-           lag(new_cases, n = 2L, default = 0)+ 
-           lag(new_cases, n = 3L, default = 0)+ 
-           lag(new_cases, n = 4L, default = 0)+ 
-           lag(new_cases, n = 5L, default = 0)+ 
-           lag(new_cases, n = 6L, default = 0)+ 
+  mutate(roll7 = (new_cases +
+           lag(new_cases, n = 2L, default = 0)+
+           lag(new_cases, n = 3L, default = 0)+
+           lag(new_cases, n = 4L, default = 0)+
+           lag(new_cases, n = 5L, default = 0)+
+           lag(new_cases, n = 6L, default = 0)+
            lag(new_cases, n = 7L, default = 0))/7
          ) %>%
-  mutate(roll7_deaths = (new_deaths + 
-           lag(new_deaths, n = 2L, default = 0)+ 
-           lag(new_deaths, n = 3L, default = 0)+ 
-           lag(new_deaths, n = 4L, default = 0)+ 
-           lag(new_deaths, n = 5L, default = 0)+ 
-           lag(new_deaths, n = 6L, default = 0)+ 
+  mutate(roll7_deaths = (new_deaths +
+           lag(new_deaths, n = 2L, default = 0)+
+           lag(new_deaths, n = 3L, default = 0)+
+           lag(new_deaths, n = 4L, default = 0)+
+           lag(new_deaths, n = 5L, default = 0)+
+           lag(new_deaths, n = 6L, default = 0)+
            lag(new_deaths, n = 7L, default = 0))/7
          ) %>%
   mutate(
@@ -213,22 +193,9 @@ df_new_cases <-
 df_new_cases
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
 **Plotting Polished Graphs**
 
-
-```{r}
+```{r polish1}
 theme_common <- function() {
   theme_minimal() %+replace%
   theme(
@@ -258,7 +225,7 @@ theme_common <- function() {
 }
 ```
 
-```{r}
+```{r polish2}
 df_new_cases %>%
   filter(date >= as.Date("2020-03-15")) %>%
   group_by(date, state_party) %>%
@@ -266,7 +233,7 @@ df_new_cases %>%
   ggplot()+
   geom_line(aes(date, roll7, color = state_party)) +
   scale_color_manual(labels = c("Democratic", "Republican"), values = c('Blue','Red'))+
-  labs( 
+  labs(
     title = "New Covid Cases over Time by Political Party",
     x = "Date",
     y = "7 Day Average of New Cases",
@@ -274,6 +241,7 @@ df_new_cases %>%
   ) +
   theme_common()
 ```
+
 **Observations**
 
 - Initially there were more new cases per day in democratic states
@@ -281,7 +249,7 @@ df_new_cases %>%
 - There have been more new cases per day in republican states(when compared to democratic state) since Mid June
 - As of right now(mid-october) there are apprx 35k new cases per day in republican states and 22k new cases per day in democratic states, and new cases are spiking in both groups
 
-```{r}
+```{r polish3}
 df_new_cases %>%
   filter(date >= as.Date("2020-03-15")) %>%
   group_by(date, state_party) %>%
@@ -289,7 +257,7 @@ df_new_cases %>%
   ggplot()+
   geom_line(aes(date, roll7_deaths, color = state_party)) +
   scale_color_manual(labels = c("Democratic", "Republican"), values = c('Blue','Red'))+
-  labs( 
+  labs(
     title = "New Covid Deaths over Time by Political Party",
     x = "Date",
     y = "7 Day Average of New Deaths",
@@ -297,13 +265,14 @@ df_new_cases %>%
   ) +
   theme_common()
 ```
+
 **Observations**
 
 - Initially there were more new deaths per day in democratic states
 - New deaths spiked for republican states towards the beginning of July
 - There have been more new deaths per day in republican states(when compared to democratic state) since the start of July
 
-```{r}
+```{r polish4}
 df_norm_state %>%
   filter(date >= as.Date("2020-03-15")) %>%
   group_by(date, state_party) %>%
@@ -311,7 +280,7 @@ df_norm_state %>%
   ggplot()+
   geom_line(aes(date, cases, color = state_party))+
   scale_color_manual(labels = c("Democratic", "Republican"), values = c('Blue','Red'))+
-  labs( 
+  labs(
     title = "Total Covid Cases over Time by Political Party",
     x = "Date",
     y = "Total Covid Cases",
@@ -319,13 +288,13 @@ df_norm_state %>%
   ) +
   theme_common()
 ```
+
 **Observations**
 
 - Initially there were more cases in democratic states
 - Covid cases in republican states increased rapidly in late June/early July and surpased the number of cases in democratic states
 
-
-```{r}
+```{r polish5}
 df_norm_state %>%
   filter(date >= as.Date("2020-03-15")) %>%
   group_by(date, state_party) %>%
@@ -334,7 +303,7 @@ df_norm_state %>%
   geom_line(aes(date, deaths, color = state_party)) +
   #scale_y_log10() +
   scale_color_manual(labels = c("Democratic", "Republican"), values = c('Blue','Red'))+
-  labs( 
+  labs(
     title = "Total Covid Deaths over Time by Political Party",
     x = "Date",
     y = "Total Covid Deaths",
@@ -342,12 +311,9 @@ df_norm_state %>%
   ) +
   theme_common()
 ```
+
 **Observations**
 
 - Deaths in Democratic states were initially high
 - Total deaths in republican states surpassed total deaths in democratic states in early October
 - Even though case count shifted in early July deaths are only catching up now, implications?!?
-
-
-
-
