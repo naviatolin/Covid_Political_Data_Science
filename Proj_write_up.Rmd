@@ -1,0 +1,23 @@
+---
+title: "Project 1: COVID Political Analysis"
+output: html_notebook
+---
+**Our Question:**
+
+In this project, we set out to answer the question: Is there a correlation between political affiliation of a county/state and their COVID case trends? Do predominantly democrat states have lower numbers of COVID cases per capita?
+
+TO DO: ADD some sentences about mask mandates being first in democrat states, and seemingly more closely followed social distancing rules/masks accepted
+
+**Our Additional Dataset:**
+
+The additional dataset that we decided to use comes from townhall.com and includes county-based results of the 2016 election across the US. Townhall is a self described "leading source for conservative news and political commentary." Based on initial investigation, I would classify this source as reputable as a standard news reporting website in 2020. Their data collection procedures are not documented on the website, that we can find. It is possible that they are not the original source for the data, but it is hard to trace back. This data source would probably be considered not reputable for a lot of other analysis and such, because it is inherently biased politically. However, because presidential election data results from 2016 have been readily available for a while now, and the results of it are far from a mystery, we can assume that their election results data is reasonably reputable. That being said, especially in recent events, we have seen some manipulation of accepted true data. For this reason, we want to acknowledge that this data source is inherently biased and there is theoretically a potential/motivation to have manipulated results, but we think it is not likely. In terms of unintentional error, it is possible that some of these counties have been incorrectly reported, or numbers are estimates, especially for smaller, less connected counties. There do not appear to be any missing counties in this dataset. (IS HAWAII ON HERE? ALASKS?)
+
+**Relevant Background:**
+TO DO: add background...
+
+**Graphs/Analysis/Conclusions:**
+
+TO DO: INSERT FINAL GRAPHS AND ANALYSIS
+
+**Remaining Questions:**
+Put in sentence form but some ideas: How does the socioeconomic status of an area impact COVID/ potentially blur our results?
