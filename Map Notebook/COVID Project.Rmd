@@ -45,13 +45,13 @@ most_recent_date <- df_normalized %>%
 ## Loads the downloaded csv
 df_covid <- read_csv(filename_nyt) 
 
-most_recent_date <- df_covid %>%
-  select(date) %>%
-  arrange(desc(date)) %>%
-  head(1)
-
-df_covid <- df_covid %>%
-  filter(date==most_recent_date)
+# most_recent_date <- df_covid %>%
+#   select(date) %>%
+#   arrange(desc(date)) %>%
+#   head(1)
+# 
+# df_covid <- df_covid %>%
+#   filter(date==most_recent_date)
   
 df_covid %>% glimpse
 
@@ -108,31 +108,50 @@ df_population_covid_political_with_map <- left_join(df_population_covid_politica
 
 df_population_covid_political_with_map %>% glimpse
 ```
+Whole Country Cases
 ```{r}
-df_population_covid_political_with_map %>%
-  ggplot(aes(long, lat, group = group, fill = deaths_per100k)) +
-  geom_polygon(color = NA) +
-  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
-  labs(fill = "Cases")
+# df_population_covid_political_with_map %>%
+#   ggplot(aes(long, lat, group = group, fill = cases_per100k)) +
+#   geom_polygon(color = NA) +
+#   coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+#   labs(fill = "Cases") +
+#   ggtitle("Reported COVID Cases 2020-10-17")
+```
+Looking at just MA
+```{r}
+library(gganimate)
+
 ```
 ```{r}
-df_population_covid_political_with_map %>%
-  filter(state_abbv == 'MA') %>% 
-  ggplot(aes(long, lat, group = group, fill = cases_per100k)) +
-  geom_polygon(color = NA) +
-  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
-  labs(fill = "Cases Per 100k")
+df_population_covid_political_with_map_with_color <- df_population_covid_political_with_map %>%
+  mutate(
+    color = ifelse(per_dem > per_gop, "democratic", "republican")
+  )
+```
+By State
 
-df_population_covid_political_with_map %>%
-  filter(state_abbv == 'MA') %>% 
-  ggplot(aes(long, lat, group = group, fill = per_gop)) +
+```{r}
+state_abbreviation <- 'VA'
+animation <- df_population_covid_political_with_map_with_color %>%
+  filter(state_abbv == state_abbreviation ) %>%
+  ggplot(aes(long, lat, group = group, alpha = cases_per100k, fill = color)) +
   geom_polygon(color = NA) +
+  scale_fill_manual(values = c("blue", "red")) + 
   coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
-  scale_fill_gradientn(colours = c("blue", "red"),
-                       labels = scales::percent,
-                       guide = guide_colorbar(title.position = "top"),
-                       colors = ) +
-  labs(fill = "Voted Trump")
+  labs(title = "Political Bias and Covid Cases in {state_abbreviation}", subtitle = "Date: {current_frame} ", fill = "Political Bias in 2016", alpha = "Covid Cases Per 100k") +
+  transition_manual(date) +
+  ease_aes('linear') +
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank()
+    )
+
+animate(animation, renderer = gifski_renderer())
+
 ```
 ```{r}
 df_population_covid_political_with_map %>%
@@ -143,7 +162,8 @@ df_population_covid_political_with_map %>%
                        labels = scales::percent,
                        guide = guide_colorbar(title.position = "top"),
                        colors = ) +
-  labs(fill = "Voted For Trump")
+  labs(fill = "Voted For Trump") +
+  ggtitle("Political Affiliation per County in 2016")
 ```
 
 ```{r}
