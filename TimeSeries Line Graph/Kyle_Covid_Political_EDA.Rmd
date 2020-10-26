@@ -20,7 +20,6 @@ df_pol_sorted <- df_pol %>%
   select(fips_code, total_2016, dem_2016, gop_2016, oth_2016) %>%
   arrange(fips_code)
 df_pol_sorted
-?separate
 ```
 
 ```{r df-pop}
@@ -31,7 +30,6 @@ df_pop_sorted <- df_pop %>%
   select('fips', 'Geographic Area Name', 'Estimate!!Total') %>%
   rename("population" = "Estimate!!Total")
 df_pop_sorted
-
 ```
 
 ```{r download-data, include=FALSE}
@@ -58,7 +56,6 @@ df_joined <- df_covid %>%
   left_join(df_pol_sorted, by = c("fips" = "fips_code")) %>%
   select(date, fips, county, state, population, cases, deaths, total_2016, dem_2016, gop_2016, oth_2016 )
 df_joined
-?left_join
 ```
 
 ```{r normalize-data}
@@ -353,7 +350,7 @@ df_new_cases %>%
   
   labs(
     title = "Total Covid Cases per 100k by county by Political Party",
-    subtitle = "As of 10/20/2020",
+    subtitle = "As of 10-20-2020",
     x = "State",
     y = "Total Covid Cases per 100k by County",
     color = "Vote in 2016"
