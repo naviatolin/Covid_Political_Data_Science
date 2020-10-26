@@ -1,0 +1,223 @@
+---
+title: "Covid Project"
+output:   
+  github_document:
+    toc: true
+---
+
+```{r setup}
+library(tidyverse)
+```
+Download Population data
+```{r}
+df_pop_no_fips <- read_csv("data/ACSDT5Y2018.B01003_data_with_overlays_2020-10-06T142714.csv", skip = 1)
+
+df_population <- 
+  df_pop_no_fips %>% 
+  separate(col = id, into = c("id_head", "fips"), sep = "US") %>% 
+  subset(select = -c(id_head, `Margin of Error!!Total`, `Geographic Area Name`)) %>%
+  select(
+    fips,
+    population = `Estimate!!Total`
+  )
+
+df_population %>% glimpse
+```
+
+Download COVID data
+```{r}
+url_counties_covid <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+filename_nyt <- "./data/nyt_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties_covid,
+        destfile = filename_nyt
+      )
+## Loads the downloaded csv
+df_covid <- read_csv(filename_nyt) 
+  
+df_covid %>% glimpse
+
+```
+Download Political data 
+```{r}
+url_counties_political <- "https://raw.githubusercontent.com/tonmcg/US_County_Level_Election_Results_08-16/master/2016_US_County_Level_Presidential_Results.csv"
+filename_political <- "./data/political_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties_political,
+        destfile = filename_political
+      )
+
+## Loads the downloaded csv
+df_political <- read_csv(filename_political)
+df_political <- df_political %>%
+  rename(
+    fips = combined_fips,
+    ) %>%
+  mutate(fips = paste0(0,fips)) %>%
+  separate(fips, into = c("zeros","fips"), sep = -5) %>%
+  subset(select = -c(zeros, X1))
+df_political %>% glimpse
+
+```
+
+Combine data
+```{r}
+df_population_covid <- merge(df_population, df_covid,  by=c("fips")) %>%   
+  select(
+    date,
+    county,
+    state,
+    fips,
+    cases,
+    deaths,
+    population
+  ) %>%
+  mutate(
+    cases_per100k = (100000 / population) * cases,
+    deaths_per100k = (100000 / population) * deaths
+  ) 
+df_population_covid_political <- merge(df_political, df_population_covid, by=c("fips")) %>%
+  rename(
+    county_fips = fips
+  )
+df_population_covid_political %>% glimpse
+```
+Add Map Data
+```{r}
+devtools::install_github('UrbanInstitute/urbnmapr')
+library(urbnmapr)
+
+```
+```{r}
+county_data = counties %>%
+  select(
+    lat,
+    long,
+    group,
+    county_fips
+  )
+```
+
+```{r}
+df_population_covid_political$county_fips = as.character(df_population_covid_political$county_fips)
+df_population_covid_political_with_map <- 
+  df_population_covid_political %>%
+  
+  group_by(county_fips) %>%
+  mutate(
+    color = ifelse(per_dem > per_gop, "democratic", "republican")
+  ) %>%
+  ungroup() %>%
+    
+  group_by(state_abbr, date) %>%
+  mutate(
+    state_party = ifelse(sum(votes_dem)>sum(votes_gop), "democratic", "republican"),
+    state_cases_per_100k = mean(cases_per100k)
+  ) %>%
+  ungroup() %>%
+    
+  select(
+    population,
+    county_fips,
+    votes_dem,
+    votes_gop,
+    per_dem,
+    per_gop,
+    state_abbr,
+    cases,
+    population,
+    deaths_per100k,
+    date,
+    cases_per100k,
+    state_party,
+    state_cases_per_100k,
+    color
+  ) %>%
+  left_join( county_data, by = "county_fips")
+
+
+df_population_covid_political_with_map %>% glimpse
+
+```
+
+Animations
+```{r}
+library(gganimate)
+```
+
+One State
+
+```{r}
+
+state_abbreviation <- 'VA'
+
+animation <- df_population_covid_political_with_map %>%
+  filter(state_abbr == state_abbreviation ) %>%
+  ggplot(aes(long, lat, group = group, alpha = cases_per100k, fill = color)) +
+  geom_polygon(color = NA) +
+  scale_fill_manual(values = c("blue", "red")) + 
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  labs(title = "Political Bias and Covid Cases in {state_abbreviation}", subtitle = "Date: {current_frame} ", fill = "Political Bias in 2016", alpha = "Covid Cases Per 100k") +
+  transition_manual(date) +
+  ease_aes('linear') +
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank()
+    )
+
+animate(animation, renderer = gifski_renderer())
+
+```
+Group by State, Whole Country
+
+```{r}
+animation <- df_population_covid_political_with_map %>%
+  ggplot(aes(long, lat, group = group, alpha = state_cases_per_100k, fill = state_party)) +
+  geom_polygon(color = NA) +
+  scale_fill_manual(values = c("blue", "red")) + 
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  labs(title = "Political Bias and Covid Cases", subtitle = "Date: {current_frame} ", fill = "Political Bias of State in 2016", alpha = "Covid Cases Per 100k") +
+  transition_manual(date) +
+  ease_aes('linear') +
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank()
+    )
+
+animate(animation, renderer = gifski_renderer())
+
+```
+Population, Single State
+```{r}
+animation <- df_population_covid_political_with_map_with_color %>%
+  ggplot(aes(long, lat, group = group, alpha = cases_per100k, fill = color)) +
+  geom_polygon(color = NA) +
+  scale_fill_manual(values = c("blue", "red")) + 
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  labs(title = "Political Bias and Covid Cases", subtitle = "Date: {current_frame} ", fill = "Political Bias in 2016", alpha = "Covid Cases Per 100k") +
+  transition_manual(date) +
+  ease_aes('linear') +
+  theme(
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.title.y=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank()
+    )
+
+animate(animation, renderer = gifski_renderer())
+
+```
