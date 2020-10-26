@@ -2,7 +2,9 @@
 title: "Politics and COVID-19"
 author: "Alpha Group"
 date: "10/26/2020"
-output: html_document
+output: 
+  github_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
