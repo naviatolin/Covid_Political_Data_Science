@@ -11,14 +11,14 @@ or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*.
 library(tidyverse)
 ```
 
-    ## -- Attaching packages ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- tidyverse 1.3.0 --
+    ## -- Attaching packages -------------------------------------------------------------------- tidyverse 1.3.0 --
 
     ## v ggplot2 3.3.2     v purrr   0.3.4
     ## v tibble  3.0.3     v dplyr   1.0.2
     ## v tidyr   1.1.2     v stringr 1.4.0
     ## v readr   1.3.1     v forcats 0.5.0
 
-    ## -- Conflicts -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+    ## -- Conflicts ----------------------------------------------------------------------- tidyverse_conflicts() --
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -113,7 +113,7 @@ df_joined <- df_covid %>%
 df_joined
 ```
 
-    ## # A tibble: 664,147 x 11
+    ## # A tibble: 667,393 x 11
     ##    date       fips  county state population cases deaths total_2016 dem_2016
     ##    <date>     <chr> <chr>  <chr>      <dbl> <dbl>  <dbl>      <dbl>    <dbl>
     ##  1 2020-01-21 53061 Snoho~ Wash~     786620     1      0     305281   165740
@@ -126,7 +126,7 @@ df_joined
     ##  8 2020-01-25 53061 Snoho~ Wash~     786620     1      0     305281   165740
     ##  9 2020-01-26 04013 Maric~ Ariz~    4253913     1      0    1201934   549040
     ## 10 2020-01-26 06037 Los A~ Cali~   10098052     1      0    2314275  1654626
-    ## # ... with 664,137 more rows, and 2 more variables: gop_2016 <dbl>,
+    ## # ... with 667,383 more rows, and 2 more variables: gop_2016 <dbl>,
     ## #   oth_2016 <dbl>
 
 ``` r
@@ -147,7 +147,7 @@ df_normalized <-
 df_normalized
 ```
 
-    ## # A tibble: 638,683 x 18
+    ## # A tibble: 641,787 x 18
     ##    date       fips  county state population cases deaths total_2016 dem_2016
     ##    <date>     <chr> <chr>  <chr>      <dbl> <dbl>  <dbl>      <dbl>    <dbl>
     ##  1 2020-01-21 53061 Snoho~ Wash~     786620     1      0     305281   165740
@@ -160,7 +160,7 @@ df_normalized
     ##  8 2020-01-25 53061 Snoho~ Wash~     786620     1      0     305281   165740
     ##  9 2020-01-26 04013 Maric~ Ariz~    4253913     1      0    1201934   549040
     ## 10 2020-01-26 06037 Los A~ Cali~   10098052     1      0    2314275  1654626
-    ## # ... with 638,673 more rows, and 9 more variables: gop_2016 <dbl>,
+    ## # ... with 641,777 more rows, and 9 more variables: gop_2016 <dbl>,
     ## #   oth_2016 <dbl>, cases_per100k <dbl>, deaths_per100k <dbl>, per_dem <dbl>,
     ## #   per_gop <dbl>, per_oth <dbl>, per_vote <dbl>, county_party <chr>
 
@@ -225,7 +225,7 @@ df_norm_state <-
 df_norm_state
 ```
 
-    ## # A tibble: 638,683 x 20
+    ## # A tibble: 641,787 x 20
     ##    date       fips  county state population cases deaths total_2016 dem_2016
     ##    <date>     <chr> <chr>  <chr>      <dbl> <dbl>  <dbl>      <dbl>    <dbl>
     ##  1 2020-01-21 53061 Snoho~ Wash~     786620     1      0     305281   165740
@@ -238,7 +238,7 @@ df_norm_state
     ##  8 2020-01-25 53061 Snoho~ Wash~     786620     1      0     305281   165740
     ##  9 2020-01-26 04013 Maric~ Ariz~    4253913     1      0    1201934   549040
     ## 10 2020-01-26 06037 Los A~ Cali~   10098052     1      0    2314275  1654626
-    ## # ... with 638,673 more rows, and 11 more variables: gop_2016 <dbl>,
+    ## # ... with 641,777 more rows, and 11 more variables: gop_2016 <dbl>,
     ## #   oth_2016 <dbl>, cases_per100k <dbl>, deaths_per100k <dbl>, per_dem <dbl>,
     ## #   per_gop <dbl>, per_oth <dbl>, per_vote <dbl>, county_party <chr>,
     ## #   state_party <chr>, state_party_fine <fct>
@@ -250,7 +250,7 @@ df_normalized_slim <-
 df_normalized_slim
 ```
 
-    ## # A tibble: 638,683 x 12
+    ## # A tibble: 641,787 x 12
     ##    date       fips  county state population cases deaths cases_per100k
     ##    <date>     <chr> <chr>  <chr>      <dbl> <dbl>  <dbl>         <dbl>
     ##  1 2020-01-21 53061 Snoho~ Wash~     786620     1      0       0.127  
@@ -263,7 +263,7 @@ df_normalized_slim
     ##  8 2020-01-25 53061 Snoho~ Wash~     786620     1      0       0.127  
     ##  9 2020-01-26 04013 Maric~ Ariz~    4253913     1      0       0.0235 
     ## 10 2020-01-26 06037 Los A~ Cali~   10098052     1      0       0.00990
-    ## # ... with 638,673 more rows, and 4 more variables: deaths_per100k <dbl>,
+    ## # ... with 641,777 more rows, and 4 more variables: deaths_per100k <dbl>,
     ## #   county_party <chr>, state_party <chr>, state_party_fine <fct>
 
 ``` r
@@ -300,7 +300,7 @@ df_new_cases <-
 df_new_cases
 ```
 
-    ## # A tibble: 638,683 x 20
+    ## # A tibble: 641,787 x 20
     ## # Groups:   fips [3,104]
     ##    date       fips  county state population cases deaths cases_per100k
     ##    <date>     <chr> <chr>  <chr>      <dbl> <dbl>  <dbl>         <dbl>
@@ -314,7 +314,7 @@ df_new_cases
     ##  8 2020-01-25 53061 Snoho~ Wash~     786620     1      0       0.127  
     ##  9 2020-01-26 04013 Maric~ Ariz~    4253913     1      0       0.0235 
     ## 10 2020-01-26 06037 Los A~ Cali~   10098052     1      0       0.00990
-    ## # ... with 638,673 more rows, and 12 more variables: deaths_per100k <dbl>,
+    ## # ... with 641,777 more rows, and 12 more variables: deaths_per100k <dbl>,
     ## #   county_party <chr>, state_party <chr>, state_party_fine <fct>,
     ## #   new_cases <dbl>, new_cases_per100k <dbl>, new_deaths <dbl>,
     ## #   new_deaths_per100k <dbl>, roll7 <dbl>, roll7_deaths <dbl>,
