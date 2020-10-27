@@ -1,20 +1,17 @@
-Politics and COVID-19
-================
+# Politics and COVID-19
+
 Alpha Group
 10/26/2020
 
 **Introduction and Background**
 
-*Note: Due to the complexities of graphing and dependencies and lots of
+_Note: Due to the complexities of graphing and dependencies and lots of
 code snippets, we decided to keep our code an report separate. To see
 the code that generated the graphs, look inside the TimeSeries Line
 Graph folder, and to see the code that made the animations, look at the
-Map Notebook folder.*
+Map Notebook folder._
 
-This year, a virus called COVID-19 began in Wuhan, China. It’s highly
-contagious characteristic in a globalized world caused it to quickly
-turn into a global pandemic. Despite its origin being debated and
-speculated on to this day, it has caused many countries to close their
+This year, a virus called COVID-19 began in Wuhan, China, although its origin is debated and speculated on to this day.. It quickly turned into a global pandemic due to its highly contagious nature. It has caused many countries to close their
 borders and ask their citizens to stay inside, wear masks, and practice
 “social distancing” - a term that was not used before. This pandemic
 caused the downfall of many economies, and utter chaos: lack of personal
@@ -72,9 +69,13 @@ Note that this data set only includes the continental US.
 
 **Graphs/Analysis/Conclusions**
 
-First, we wanted to create a graph that illuminated the differences in
+![](Write_up_images/Whole_Country.gif)
+
+If you have been living in the United States, it might be a relatable narrative to hear that COVID-19 started spreading quickly through the democratic states earlier in the spring, and then hit the republican states. The graph above details the progression of COVID-19 throughout the United States. In this graph, opacity is related to the covid cases per 100k. First, we can see the northeast blue states gain opacity, and then quickly see the republican states follow. However, we do see some of the democratic states significantly gain opacity with the republican states later on as well. Although this graph does support the narrative we know from personal experience, we cannot conclusively say anything about the relationship between statewide political affiliation and covid cases just yet.
+
+To investigate this further, the graph below illuminates the differences in
 the number of new cases over seven days of each party. To determine the
-state party we summed all of the GDP and Dem votes in a state and
+state party we summed all of the GOP and Democratic votes in a state and
 assigned the party with the majority of votes as the party affiliation.
 The rolling seven-day average was calculated by summing the new cases
 per week and then dividing by seven. We determined what was a “new case”
@@ -87,23 +88,25 @@ state populations.
 Looking at the normalized 7 day average of new cases graph, we initially
 noticed a few different trends. Initially, Democratic states had more
 cases per capita, but then republican states surpassed new dem case
-numbers in June; therefore, we think there may be some correlation
-between party affiliation and COVID cases per state. Perhaps the logic
-here is that democratic states tend to be a lot more populated and
-congested, and since COVID is highly contagious, it makes sense that
+numbers in June. This information supports our initial thoughts in the "Political Bias and Covid Cases" animated graph we looked at before. We can start to think there may be some correlation
+between party affiliation and COVID cases per state. 
+
+One potential reason could be that democratic states tend to be a lot more populated and congested, and since COVID is highly contagious, it makes sense that
 their numbers spiked first. However, as time normalized the spread of
 COVID, democratic states often adapted to implement mask mandates and
 social distancing norms, while many republican states have been
 reluctant and unwilling to commit to social distancing and a life
-modified by the virus. While both democratic and republican case numbers
+modified by the virus. These reasonings are based on national news coverage and may not necessarily reflect the actual behavior of citizens in any particular region.
+
+While both democratic and republican case numbers
 spiked in June, new cases spiked significantly more in Republican
-states, who have historically been more resistant to mask mandates and
+states, who have historically been more resistant to mandate masks and
 social distancing practices. As of today, there appear to be about \~35k
 new cases per day in republican states, and only 22k new cases per day
-in democratic states.
+in democratic states. This evidence can point to the fact that the Republican states' response might be allowing for greater spikes in COVID-19.
 
-Now that we have looked at new cases by the week in different states, we
-want to look deeper into total COVID cases and deaths by state. What
+
+Since we looked at the rolling 7 day average of new cases, another important metric is the total COVID cases and deaths by state. What
 follows is two graphs, both normalized per 100k people, the first graph
 shows the total cases in all democratic versus republican states, and
 the latter graph shows the same with death numbers.
@@ -163,6 +166,24 @@ the fewest cases per capita are from democratic leaning states. However,
 there are some republican states with fewer cases and some democratic
 states with more cases. Overall, it appears that republican states are
 currently being hit harder by the pandemic.
+
+This conclusion begs the question, in predominant swing states, does the political party of a particular county have a similar relation with the COVID numbers. 
+
+![](Write_up_images/NC.gif)
+
+Here, we can look at North Carolina, a very important swing state. The opacity of the state seems to grow equally across counties and growth inside of North Carolina doesn't seem to have any relation to whether the county was democratic or republican. To test the theory that there isn't any clear relationship, lets look at a couple other predominant swing states.
+
+![](Write_up_images/PA.gif)
+
+In Pennsylvania, we can see that the democratic counties, in general, tend to end more opaque than some of the other republican counties. The opacities among the republican counties have a greater range in the negative direction when comparied with democratic counties in Pennsylvania.
+
+![](Write_up_images/VA.gif)
+
+In Virginia, we can see that the democratic counties become more opaque first when compared to the majority of Republican counties. We saw a similar trend in Pennsylvania as well.
+
+While the growth inter-North Carolina seems more random, the growth inter-Pennsylvania and inter-Virginia seems to show that a higher percentage of democratic counties became more opaque before other republican counties. This means that a larger proportion of Democratic counties in the predominant swing states that we looked at had greater growth in terms of COVID-19 case numbers. 
+
+This directly conflicts with the countrywide trend that we noticed earlier. As disussed previously, this could be due to democratic parts of the country generally having a higher population density which does relate to COVID-19 growth, however, this may not be the case and cannot be said conclusively.
 
 **Remaining Questions**
 
